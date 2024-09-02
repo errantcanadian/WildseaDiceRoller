@@ -35,6 +35,6 @@ For the dice roller to work for each player, the following need to be true:
 Copyright 2024, Trystan Goetze
 Licence: MIT https://opensource.org/license/MIT
 
-A major inspiration and the source of some lines of code is the [basic dice roller](https://script.google.com/u/0/home/projects/1HuMPfc-sfehoZ06KFVI39J5dCr7kLAm7yxZyAc0tDw8NM1ER8FN8igMx/edit) developed by Alice Keeler.
+A major inspiration and the source of some lines of code is the [basic dice roller for Google Slides](https://script.google.com/u/0/home/projects/1HuMPfc-sfehoZ06KFVI39J5dCr7kLAm7yxZyAc0tDw8NM1ER8FN8igMx/edit) developed by Alice Keeler.
 
 Originally inspired way back when by a [tweet from Mike Shea (@SlyFlourish)](https://twitter.com/SlyFlourish/status/1262912502679158786) about using Slides as a VTT alternative.
