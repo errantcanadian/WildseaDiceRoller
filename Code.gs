@@ -7,6 +7,7 @@
 function onOpen() {
   SpreadsheetApp.getUi()
   .createMenu('Action Roll')
+    .addItem('Zero Dice', 'Roll0D6')
     .addItem('1d6', 'Roll1D6')
     .addItem('2d6', 'Roll2D6')
     .addItem('3d6', 'Roll3D6')
@@ -26,8 +27,8 @@ function RollD6(numDice) {
   // Get username for output
   // Pulls the currently active sheet name and records it as the roller - ensure you have the character's sheet selected
   // Comment out this section if you want to prompt for roller names each time instead
-  var rollerIn = ss.getActiveSheet();
-  var roller = rollerIn.getSheetName();
+  let rollerIn = ss.getActiveSheet();
+  let roller = rollerIn.getSheetName();
   // Uncomment the below if you want to prompt for roller names each time
   // var rollerIn = ui.prompt('Who\'s rolling?', ui.ButtonSet.OK);
   // var roller = String();
@@ -40,8 +41,8 @@ function RollD6(numDice) {
   //   Logger.log(`User is ${roller}`);
   // }
   // Check for cuts
-  var cutsIn = ui.prompt('How many dice to cut?', ui.ButtonSet.OK);
-  var cuts = Number();
+  let cutsIn = ui.prompt('How many dice to cut?', ui.ButtonSet.OK);
+  let cuts = Number();
   if (cutsIn.getResponseText() == ''){
     cuts = 0;
   }
@@ -54,10 +55,16 @@ function RollD6(numDice) {
     }
   }
   Logger.log(`Roll is cut by ${cuts} dice`);
-  // Roll the dice
+  // Check if number of dice is Zero after cuts - If yes, go to RollZeroDice()
+  if ((numDice - cuts) < 1){
+    RollZeroDice(roller,numDice,cuts);
+    Logger.log('Cuts reduced number of dice to zero or fewer');
+    return;
+  }
+  // Roll the dice if more than zero
   let RollResult = new Array();
     for (d=1; d<numDice+1; d++){
-      var roll = getRndInt(1,6);
+      let roll = getRndInt(1,6);
       Logger.log('User rolled a '+roll);
       RollResult.push(roll);
     }
@@ -70,11 +77,11 @@ function RollD6(numDice) {
   }
   Logger.log('With cuts, result is '+RollResult);
   // Build result report
-  var message = `You rolled ${numDice}d6 with ${cuts} cuts: ${RollResult}`;
+  let message = `You rolled ${numDice}d6 with ${cuts} cuts: ${RollResult}`;
   // Interpret result
-  var highest = Math.max(...RollResult);
-  var outcome = 0; // 0 = Disaster, 1 = Conflict, 2 = Triumph
-  var twist = false; // false = no twist, true = yes twist
+  let highest = Math.max(...RollResult);
+  let outcome = Number(); // 0 = Disaster, 1 = Conflict, 2 = Triumph
+  let twist = false; // false = no twist, true = yes twist
   if (highest == 6){
     message = message.concat('\nTriumph!');
     outcome = 2;
@@ -126,8 +133,8 @@ function WriteResult(u, r, o, t){
     let NewRollSheet = ss.getSheetByName('Rolls');
     NewRollSheet.appendRow(['Roller', 'Roll', 'Result']);
   }
-  var rollSheet = ss.getSheetByName('Rolls');
-  var outcome = String();
+  let rollSheet = ss.getSheetByName('Rolls');
+  let outcome = String();
   if (o == 2){
     outcome = 'Triumph!';
   }
@@ -141,6 +148,27 @@ function WriteResult(u, r, o, t){
     outcome = outcome.concat(' ...with a Twist!');
   }
   rollSheet.appendRow([u, String(r), outcome]);
+}
+
+function RollZeroDice(u, d, c){
+  const ui = SpreadsheetApp.getUi();
+  Logger.log('User is rolling zero dice');
+  let roll = getRndInt(1,6);
+  Logger.log(`User rolled a ${roll}`);
+  let message = `You rolled ${d} dice with ${c} cuts: ${roll}`;
+  let outcome = Number();
+  if (roll > 3){
+    message = message.concat('\nConflict!');
+    outcome = 1;
+    Logger.log('User got a Conflict');
+  }
+  else {
+    message = message.concat('\nDisaster!');
+    outcome = 0;
+    Logger.log('User got a Disaster');
+  }
+  WriteResult(u, roll, outcome, false)
+  ui.alert(message);
 }
 
 function Roll1D6() {
@@ -165,4 +193,15 @@ function Roll5D6() {
 
 function Roll6D6() {
   RollD6(6);
+}
+
+function Roll0D6() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Get username for output
+  // Pulls the currently active sheet name and records it as the roller - ensure you have the character's sheet selected
+  // Comment out this section if you want to prompt for roller names each time instead
+  let rollerIn = ss.getActiveSheet();
+  let roller = rollerIn.getSheetName();
+  RollZeroDice(roller,'zero', 'no');
 }
