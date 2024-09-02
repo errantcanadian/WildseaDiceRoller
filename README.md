@@ -20,6 +20,7 @@ To use this script, follow these instructions:
 7. You should now see a custom menu labeled 'Action Roll'.
 8. Try rolling the dice from the Action Roll menu. You will be prompted to authorize the script:
 - Click "OK"
+- If you get a warning that the app is unverified, bypass it: click the small link at the bottom left that says "Advanced", then the small link at the bottom that says "Go to [the name of your Apps Script] (unsafe)". (Ordinarily this would be a risky thing to do. You should check my code here before using it, of course.)
 - Choose the Google account you're using with the virtual play surface
 - Click "Allow"
 - The authorization step cancels your first attempt to run the script. Try rolling again to make sure it works.
