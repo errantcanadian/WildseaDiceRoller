@@ -4,6 +4,7 @@
 // Licence: MIT https://opensource.org/license/MIT
 // Repository: https://github.com/errantcanadian/WildseaDiceRoller/
 
+// Build Action Roll menu
 function onOpen() {
   SpreadsheetApp.getUi()
   .createMenu('Action Roll')
@@ -17,47 +18,43 @@ function onOpen() {
     .addToUi();
 }
 
+// Dice Roller
 function getRndInt(min,max){
   return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
 
+// Workhorse function
 function RollD6(numDice) {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   // Get username for output
   // Pulls the currently active sheet name and records it as the roller - ensure you have the character's sheet selected
-  // Comment out this section if you want to prompt for roller names each time instead
   let rollerIn = ss.getActiveSheet();
   let roller = rollerIn.getSheetName();
-  // Uncomment the below if you want to prompt for roller names each time
-  // var rollerIn = ui.prompt('Who\'s rolling?', ui.ButtonSet.OK);
-  // var roller = String();
-  // if (rollerIn.getResponseText() == ''){
-  //   roller = 'NoName';
-  //   Logger.log('User did not enter a name');
-  // }
-  // else {
-  //   roller = String(rollerIn.getResponseText());
-  //   Logger.log(`User is ${roller}`);
-  // }
   // Check for cuts
   let cutsIn = ui.prompt('How many dice to cut?', ui.ButtonSet.OK);
   let cuts = Number();
+  let CutsSet = [];
   if (cutsIn.getResponseText() == ''){
     cuts = 0;
   }
   else {
-    try{
-      cuts = Number(cutsIn.getResponseText());
-    } catch (error) {
+    if (isNaN(Number(cutsIn.getResponseText()))) {
       ui.alert('When entering cuts, please input a number or leave blank.');
       Logger.log('Error: user did not enter number or empty string');
+      return;
+    }
+    else {
+      cuts = Number(cutsIn.getResponseText());
     }
   }
   Logger.log(`Roll is cut by ${cuts} dice`);
   // Check if number of dice is Zero after cuts - If yes, go to RollZeroDice()
   if ((numDice - cuts) < 1){
-    RollZeroDice(roller,numDice,cuts);
+    for (i = 0; i < cuts; i++) {
+      CutsSet.push(i);
+    }
+    RollZeroDice(roller,numDice,CutsSet);
     Logger.log('Cuts reduced number of dice to zero or fewer');
     return;
   }
@@ -71,13 +68,20 @@ function RollD6(numDice) {
     Logger.log('Roll result is '+RollResult);
     RollResult.sort();
     Logger.log('Sorted result is '+RollResult);
-  // Apply cuts
+  // Roll cuts
   for (i=0; i<cuts; i++){
-    RollResult.pop();
+    CutsSet.push(RollResult.pop());
   }
+  Logger.log('Dice cut:'+CutsSet);
   Logger.log('With cuts, result is '+RollResult);
   // Build result report
-  let message = `You rolled ${numDice}d6 with ${cuts} cuts: ${RollResult}`;
+  let message = `You rolled ${numDice}d6 with ${cuts} cuts: `;
+  if (cuts == 0) {
+    message = message.concat(`${RollResult}`);
+  }
+  else {
+    message = message.concat(`${RollResult} // ${CutsSet}`)
+  }
   // Interpret result
   let highest = Math.max(...RollResult);
   let outcome = Number(); // 0 = Disaster, 1 = Conflict, 2 = Triumph
@@ -107,7 +111,7 @@ function RollD6(numDice) {
     twist = false;
     Logger.log('No doubles, no twist');
   }
-  WriteResult(roller, RollResult, outcome, twist)
+  WriteResult(roller, RollResult, outcome, twist, CutsSet)
   ui.alert(message);
 }
 
@@ -126,7 +130,7 @@ function Doubles(a){
   return false;
 }
 
-function WriteResult(u, r, o, t){
+function WriteResult(u, r, o, t, c){
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   if (ss.getSheetByName('Rolls') == null){
     ss.insertSheet('Rolls');
@@ -147,15 +151,19 @@ function WriteResult(u, r, o, t){
   if (t){
     outcome = outcome.concat(' ...with a Twist!');
   }
-  rollSheet.appendRow([u, String(r), outcome]);
+  let rollEntry = String(r);
+  if (c.length > 0) {
+    rollEntry = rollEntry.concat(' // '+c)
+  }
+  rollSheet.appendRow([u, rollEntry, outcome]);
 }
 
 function RollZeroDice(u, d, c){
   const ui = SpreadsheetApp.getUi();
   Logger.log('User is rolling zero dice');
-  let roll = getRndInt(1,6);
+  let roll = getRndInt(1,6); // main roll
   Logger.log(`User rolled a ${roll}`);
-  let message = `You rolled ${d} dice with ${c} cuts: ${roll}`;
+  let message = `You rolled ${d} dice with ${c.length} cuts: ${roll}`; // start building message
   let outcome = Number();
   if (roll > 3){
     message = message.concat('\nConflict!');
@@ -167,7 +175,7 @@ function RollZeroDice(u, d, c){
     outcome = 0;
     Logger.log('User got a Disaster');
   }
-  WriteResult(u, roll, outcome, false)
+  WriteResult(u, roll, outcome, false, []);
   ui.alert(message);
 }
 
@@ -196,12 +204,11 @@ function Roll6D6() {
 }
 
 function Roll0D6() {
-  const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   // Get username for output
   // Pulls the currently active sheet name and records it as the roller - ensure you have the character's sheet selected
   // Comment out this section if you want to prompt for roller names each time instead
   let rollerIn = ss.getActiveSheet();
   let roller = rollerIn.getSheetName();
-  RollZeroDice(roller,'zero', 'no');
+  RollZeroDice(roller,'zero', []);
 }
