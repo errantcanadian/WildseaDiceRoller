@@ -115,6 +115,7 @@ function RollD6(numDice) {
   ui.alert(message);
 }
 
+// Checks if there is a twist
 function Doubles(a){
   for (i=0; i<a.length; i++){
     for (j=0; j<a.length; j++){
@@ -130,6 +131,7 @@ function Doubles(a){
   return false;
 }
 
+// Writes the result to the sheet
 function WriteResult(u, r, o, t, c){
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   if (ss.getSheetByName('Rolls') == null){
@@ -158,6 +160,7 @@ function WriteResult(u, r, o, t, c){
   rollSheet.appendRow([u, rollEntry, outcome]);
 }
 
+// Rolls zero dice
 function RollZeroDice(u, d, c){
   const ui = SpreadsheetApp.getUi();
   Logger.log('User is rolling zero dice');
@@ -179,6 +182,7 @@ function RollZeroDice(u, d, c){
   ui.alert(message);
 }
 
+// The following six functions are necessary because for some reason Google Apps Scripts don't allow ui menu items to call functions with arguments
 function Roll1D6() {
   RollD6(1);
 }
@@ -203,6 +207,7 @@ function Roll6D6() {
   RollD6(6);
 }
 
+// Handles a straight zero dice roll, rather than a roll where all dice are cut
 function Roll0D6() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   // Get username for output
