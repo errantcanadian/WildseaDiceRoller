@@ -7,7 +7,7 @@ This extension adds a custom menu to the spreadsheet that makes up the Virtual P
 
 Rolls and their results are reported in a dialogue box, and recorded to a "Rolls" sheet (which is created automatically if none exists).
 
-**Important note:** By default, the name of the roller that is recorded to the "Rolls" sheet is the name of the active sheet at the time of the roll. For accurate recording, ensure your character sheet is selected when you roll. This behaviour can be changed to instead prompt for the roller's name every time by un/commenting out several lines of code (see the source).
+**Important note:** By default, the name of the roller that is recorded to the "Rolls" sheet is the name of the active sheet at the time of the roll. For accurate recording, ensure your character sheet is selected when you roll.
 
 ## How to Add to the Virtual Play Surface
 To use this script, follow these instructions:
